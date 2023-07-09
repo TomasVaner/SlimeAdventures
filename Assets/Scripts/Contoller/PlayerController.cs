@@ -10,8 +10,6 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CircleCollider2D))]
 public class PlayerController : Creature
 {
-    private bool jumpPressed = false;
-
     public void Move(InputAction.CallbackContext context)
     {
         if (context.performed)
