@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Animator))]
+[ExecuteInEditMode]
 public class SpriteAnimationController : MonoBehaviour
 {
     private Animator animator;
@@ -11,7 +13,7 @@ public class SpriteAnimationController : MonoBehaviour
     private readonly int jumping = Animator.StringToHash("Jumping");
     private readonly int isFalling = Animator.StringToHash("IsFalling");
     private readonly int landing = Animator.StringToHash("Landing");
-    private readonly int dying = Animator.StringToHash("Dying");
+    private readonly int dying = Animator.StringToHash("IsDying");
 
     private void Awake()
     {
@@ -38,8 +40,8 @@ public class SpriteAnimationController : MonoBehaviour
         animator.SetTrigger(landing);
     }
 
-    public void Dying()
+    public void SetDying(bool value)
     {
-        animator.SetTrigger(dying);
+        animator.SetBool(dying, value);
     }
 }
