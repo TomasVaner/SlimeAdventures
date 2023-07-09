@@ -15,12 +15,17 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpHeight;
     [SerializeField] private float acceleration;
     [SerializeField] private float maxSpeed;
+    private Vector2 speed;
     private Vector2 movement;
     private bool jumpPressed = false;
-    private bool jump = false;
+    private bool jumping = false;
+    private float jumpHeldStartTime;
+    private float jumpStartTime;
+    private float jumpHeldDuration;
+    [SerializeField] private LayerMask ground;
+    
     [SerializeField] private bool isLookingRight;
 
-    [SerializeField] private LayerMask ground;
     private bool grounded;
 
     private SpriteAnimationController anim;
@@ -44,9 +49,15 @@ public class PlayerController : MonoBehaviour
     public void Jump(InputAction.CallbackContext context)
     {
         if (context.performed)
+        {
+            jumpHeldStartTime = Time.time;
             jumpPressed = true;
+        }
         else if (context.canceled)
+        {
+            jumpHeldDuration = Time.time - jumpHeldStartTime;
             jumpPressed = false;
+        }
     }
 
     private void FixedUpdate()
@@ -61,6 +72,9 @@ public class PlayerController : MonoBehaviour
         anim.SetFalling(!grounded);
         
         var velocity = rb.velocity;
+        
+        if (velocity.y < -0.01f)
+            Debug.Log(Time.time + ": started falling");
         if (movement.SqrMagnitude() < 0.01f)
         {
             velocity.x += -velocity.x * acceleration * Time.deltaTime;
@@ -79,46 +93,58 @@ public class PlayerController : MonoBehaviour
         {
             Flip();
         }
+        rb.velocity = velocity;
 
         if (jumpPressed)
         {
-            if (grounded && !jump)
+            if (grounded && !jumping)
             {
                 Debug.Log("Initializing jump");
                 anim.Jump();
-                jump = true;
+                jumping = true;
             }
         }
-        else if (jump)
+        else if (jumping)
         {
             AbortJump();
         }
 
         anim.SetHorizontalSpeed(Mathf.Abs(velocity.x)/maxSpeed);
-        rb.velocity = velocity;
+        speed = rb.velocity;
     }
 
     private void ActivateJump()
     {
         if (grounded)
         {
-            Debug.Log("Jump");
+            jumpStartTime = Time.time;
+            Debug.Log(Time.time + ": Jump");
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Sqrt(2.0f * rb.gravityScale * jumpHeight));
             if (!jumpPressed)
                 AbortJump();
+        }
+        else
+        {
+            jumping = false;
         }
     }
 
     private void AbortJump()
     {
+        if (jumpStartTime <= 0.01f
+            || Time.time < jumpStartTime + jumpHeldDuration)
+            return;
+        Debug.Log(Time.time + ": Aborting jump, jumpStartTime: " + jumpStartTime + " jumpHeldDuration: " + jumpHeldDuration);
         var velocity = rb.velocity;
         if (velocity.y > 0)
         {
-            velocity.y /= 2;
+            Debug.Log(Time.time + ": Resetting vertical speed");
+            velocity.y = 0;
             rb.velocity = velocity;
         }
 
-        jump = false;
+        jumping = false;
+        jumpStartTime = 0f;
     }
 
     private void Flip()
