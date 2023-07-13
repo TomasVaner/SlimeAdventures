@@ -12,9 +12,9 @@ TagManager:
   - Water
   - UI
   - Ground
-  - 
-  - 
-  - 
+  - GroundJumpThrough
+  - InteractableObject
+  - Object
   - 
   - 
   - 
@@ -46,4 +46,10 @@ TagManager:
     locked: 0
   - name: Player
     uniqueID: 3808697001
+    locked: 0
+  - name: Object
+    uniqueID: 359429193
+    locked: 0
+  - name: InteractableObject
+    uniqueID: 1119834665
     locked: 0
