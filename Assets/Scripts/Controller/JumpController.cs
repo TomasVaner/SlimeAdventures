@@ -47,6 +47,8 @@ namespace Controller
             }
         }
         
+        public bool CanMove { get; set; }
+        
     #endregion
         
     #region Private fields
@@ -75,7 +77,7 @@ namespace Controller
 
         private void OnCollisionExit2D(Collision2D other)
         {
-            if (!_jumpThroughPlatforms
+            if ((!_jumpThroughPlatforms || CanMove)
                 && ((1 << other.gameObject.layer) & jumpthroughGround) != 0)
                 _collider2D.forceReceiveLayers |= jumpthroughGround;
         }
@@ -86,6 +88,8 @@ namespace Controller
 
         public void Jump()
         {
+            if (!CanMove)
+                return;
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Sqrt(2.0f * rb.gravityScale * jumpHeight));
         }
         

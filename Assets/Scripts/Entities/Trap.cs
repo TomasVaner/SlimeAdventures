@@ -1,18 +1,35 @@
-using System.Collections;
-using System.Collections.Generic;
+/*
+ * Copyright (c) Tomas Vaner
+ * https://github.com/TomasVaner
+*/
+
+using System;
+using System.Linq;
 using UnityEngine;
 
-public class Trap : MonoBehaviour
+namespace Entities
 {
-    // Start is called before the first frame update
-    void Start()
+    public class Trap : MonoBehaviour
     {
-        
-    }
+    #region Variables
 
-    // Update is called once per frame
-    void Update()
-    {
+        [SerializeField] private float _damage;
+        [SerializeField] private float _knockback;
+
+    #endregion
+
+    #region Unity functions
+
+        private void OnCollisionEnter2D(Collision2D col)
+        {
+            var creature = col.gameObject.GetComponent<Creature>();
+            if (!(creature is null))
+            {
+                creature.Damage(_damage, col.contacts.Length > 0 ? col.contacts.First().point : null, _knockback);
+            }
+        }
+
+    #endregion
         
     }
 }

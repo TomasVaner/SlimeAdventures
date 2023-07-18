@@ -15,6 +15,7 @@ namespace Controller
     [RequireComponent(typeof(JumpController))]
     [RequireComponent(typeof(MovementController))]
     [RequireComponent(typeof(Creature))]
+    [RequireComponent(typeof(PlayerAudioController))]
     public class PlayerController : MonoBehaviour
     {
     #region Variables
@@ -26,6 +27,7 @@ namespace Controller
         private JumpController jump;
         private MovementController move;
         private Creature creature;
+        private PlayerAudioController _audio;
         
         private int jumpsLeft;
         private float jumpHeldStartTime;
@@ -42,6 +44,8 @@ namespace Controller
             jumpsLeft = jumpsMax;
             move = GetComponent<MovementController>();
             creature = GetComponent<Creature>();
+            creature.PropertyChanged += CreatureOnPropertyChanged;
+            _audio = GetComponent<PlayerAudioController>();
         }
 
         private void FixedUpdate()
@@ -70,6 +74,8 @@ namespace Controller
         {
             if (context.performed)
             {
+                if (!creature.CanMove)
+                    return;
                 move.Movement = context.ReadValue<Vector2>();
                 jump.JumpThroughPlatforms = move.Movement.y < -0.01f;
             }
@@ -83,8 +89,6 @@ namespace Controller
         
         public void JumpInput(InputAction.CallbackContext context)
         {
-            if (!creature.CanMove)
-                return;
             if (context.performed)
             {
                 if (jump.IsGrounded())
@@ -94,6 +98,7 @@ namespace Controller
                 }
                 else if (jumpsLeft > 0)
                 {
+                    _audio.PlayJump();
                     jump.Jump();
                     jumpStartTime = Time.time;
                     --jumpsLeft;
@@ -116,6 +121,7 @@ namespace Controller
                 return;
             if (jump.IsGrounded())
             {
+                _audio.PlayJump();
                 jumpStartTime = Time.time;
                 jump.Jump();
                 --jumpsLeft;
@@ -123,5 +129,19 @@ namespace Controller
         }
 
     #endregion
+
+    #region Creature Callbacks
+
+        private void CreatureOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(creature.CanMove))
+            {
+                jump.CanMove = creature.CanMove;
+                move.CanMove = creature.CanMove;
+            }
+        }
+        
+    #endregion
+        
     }
 }

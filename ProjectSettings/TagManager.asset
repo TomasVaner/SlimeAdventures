@@ -15,7 +15,7 @@ TagManager:
   - GroundJumpThrough
   - InteractableObject
   - Object
-  - 
+  - Trap
   - 
   - 
   - 
@@ -44,12 +44,15 @@ TagManager:
   - name: Ground
     uniqueID: 3978220561
     locked: 0
-  - name: Player
-    uniqueID: 3808697001
-    locked: 0
   - name: Object
     uniqueID: 359429193
     locked: 0
   - name: InteractableObject
     uniqueID: 1119834665
+    locked: 0
+  - name: Player
+    uniqueID: 3808697001
+    locked: 0
+  - name: UI
+    uniqueID: 3129238799
     locked: 0

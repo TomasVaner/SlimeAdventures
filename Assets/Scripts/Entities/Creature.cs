@@ -1,11 +1,12 @@
-using System;
+using BaseClasses;
 using Controller;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Entities
 {
     [RequireComponent(typeof(Rigidbody2D))]
-    public class Creature : MonoBehaviour
+    public class Creature : NotifyMonoBehaviour
     {
     #region Variables
         [SerializeField] private Transform spawnPosition;
@@ -20,12 +21,17 @@ namespace Entities
         private SpriteAnimationController anim;
         private float currentHealth;
         private float damagedTime;
-
+        private bool _canMove;
+        
     #endregion
         
     #region Properties
-        
-        public bool CanMove { get; private set; }
+
+        public bool CanMove
+        {
+            get => _canMove;
+            private set => SetField(ref _canMove, value);
+        }
         
     #endregion
         
@@ -47,18 +53,24 @@ namespace Entities
             anim.SetDying(false);
             CanMove = true;
             currentHealth = maxHealth;
+            damagedTime = 0.0f;
         }
 
-        public void Damage(float value, Transform source, float knockbackForce = 10)
+        public void Damage(float value, Vector3? source, float knockbackForce = 10)
         {
-            if (damagedTime + immunityTime < Time.time)
+            if (damagedTime + immunityTime > Time.time)
                 return;
             damagedTime = Time.time;
             currentHealth -= value;
-            if (currentHealth < 0f)
+            Debug.Log("Damaged for " + value + ", health left " + currentHealth);
+            if (currentHealth <= 0.01f)
                 Die();
-            rb.velocity = (source.transform.position - transform.position).normalized *
-                          (knockbackForce / knockbackResistance);
+            if (source.HasValue)
+            {
+                var knockback = (transform.position - source.Value).normalized;
+                transform.Translate(knockback / 2);
+                rb.AddForce(knockback * (knockbackForce / knockbackResistance), ForceMode2D.Impulse);
+            }
         }
         
         private void Die()
